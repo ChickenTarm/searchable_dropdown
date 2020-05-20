@@ -1,0 +1,40 @@
+# https://dart.dev/guides/language/analysis-options
+
+include: package:effective_dart/analysis_options.yaml
+
+analyzer:
+  strong-mode:
+    # Maybe these will be changed in the future.
+    implicit-casts: false
+    implicit-dynamic: true
+  # errors:
+    # Trigger build failures for these rules.
+    # unused_field: error
+    # unused_local_variable: error
+
+  # TODO Possibly enable these in the future.
+  # enable-experiment:
+  #   - non-nullable # https://stackoverflow.com/questions/60068435/what-is-nullability-in-dart-non-nullable-by-default
+  
+linter:
+  rules:
+    # Disable dumb rules.
+    prefer_relative_imports: false
+    public_member_api_docs: false
+    omit_local_variable_types: false
+    file_names: false
+    avoid_types_on_closure_parameters: false
+    lines_longer_than_80_chars: false
+    constant_identifier_names: false
+    unnecessary_brace_in_string_interps: false
+    prefer_final_fields: false
+    non_constant_identifier_names: false
+    avoid_positional_boolean_parameters: false
+    prefer_collection_literals: false
+    avoid_catches_without_on_clauses: false
+
+    # Enable smart rules.
+    always_declare_return_types: true
+    annotate_overrides: true
+    prefer_is_empty: true
+    unnecessary_string_interpolations: true
