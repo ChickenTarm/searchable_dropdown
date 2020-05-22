@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:searchable_dropdown/SearchableDropdownController.dart';
 import 'package:searchable_dropdown/searchable_multiple_dropdown.dart';
 
 class NotGiven {
@@ -42,99 +43,78 @@ Widget prepareWidget(dynamic object,
   return (Text("Unknown type: ${object.runtimeType.toString()}"));
 }
 
-class DropdownMuliAddingDialog<T> extends StatefulWidget {
-  final List<DropdownMenuItem<T>> items;
+class DropdownMuliAddingDialog extends StatefulWidget {
+  final List<DropdownMenuItem<String>> items;
+  final DropdownMenuItem<String> Function(String itemLabel) dropdownItemBuilder;
+  final SearchableDropdownController searchableDropdownController;
   final Widget hint;
   final bool isCaseSensitiveSearch;
   final dynamic closeButton;
   final TextInputType keyboardType;
-  final List<int> Function(String, dynamic) searchFn;
-  final List<int> selectedItems;
-  final Widget Function(DropdownMenuItem, bool) displayItem;
+  final List<int> Function(String, List<DropdownMenuItem<String>>) searchFn;
+  final Widget Function(DropdownMenuItem<String>, bool) displayItem;
   final dynamic doneButton;
   final String Function(List<int>) validator;
   final bool dialogBox;
   final PointerThisPlease<bool> displayMenu;
   final BoxConstraints menuConstraints;
-  final Function callOnPop;
   final Color menuBackgroundColor;
 
   DropdownMuliAddingDialog({
     Key key,
     this.items,
+    this.dropdownItemBuilder,
+    this.searchableDropdownController,
     this.hint,
     this.isCaseSensitiveSearch = false,
     this.closeButton,
     this.keyboardType,
     this.searchFn,
-    this.selectedItems,
     this.displayItem,
     this.doneButton,
     this.validator,
     this.dialogBox,
     this.displayMenu,
     this.menuConstraints,
-    this.callOnPop,
     this.menuBackgroundColor,
   })  : assert(items != null),
         super(key: key);
 
   @override
-  _DropdownMuliAddingDialogState<T> createState() =>
-      new _DropdownMuliAddingDialogState<T>();
+  _DropdownMuliAddingDialogState createState() =>
+      _DropdownMuliAddingDialogState();
 }
 
-class _DropdownMuliAddingDialogState<T>
-    extends State<DropdownMuliAddingDialog> {
-  TextEditingController txtSearch = new TextEditingController();
+class _DropdownMuliAddingDialogState extends State<DropdownMuliAddingDialog> {
+  TextEditingController txtSearch = TextEditingController();
   TextStyle defaultButtonStyle =
-      new TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
+      TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
   List<int> shownIndexes = [];
-  List<int> Function(String, dynamic) searchFn;
 
   _DropdownMuliAddingDialogState();
 
-  List<int> get selectedResult {
-    return widget.selectedItems;
+  void _updateShownIndexes(String keyword) {
+    setState(() {
+      shownIndexes = widget.searchFn(keyword, widget.items);
+    });
   }
 
-  void _updateShownIndexes(String keyword) {
-    shownIndexes = searchFn(keyword, widget.items);
+  void update() {
+    setState(() {
+    });
   }
 
   @override
   void initState() {
-    if (widget.searchFn != null) {
-      searchFn = widget.searchFn;
-    } else {
-      bool Function(dynamic, String) matchFn;
-      if (widget.isCaseSensitiveSearch) {
-        matchFn = (item, keyword) {
-          return (item.value.toString().contains(keyword));
-        };
-      } else {
-        matchFn = (item, keyword) {
-          return (item.value
-              .toString()
-              .toLowerCase()
-              .contains(keyword.toLowerCase()));
-        };
-      }
-      searchFn = (keyword, items) {
-        List<int> shownIndexes = [];
-        int i = 0;
-        widget.items.forEach((item) {
-          if (matchFn(item, keyword) || (keyword?.isEmpty ?? true)) {
-            shownIndexes.add(i);
-          }
-          i++;
-        });
-        return (shownIndexes);
-      };
-    }
-    assert(searchFn != null);
     _updateShownIndexes('');
+    widget.searchableDropdownController.addListener(update);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.searchableDropdownController.removeListener(update);
+    super.dispose();
   }
 
   @override
@@ -142,22 +122,22 @@ class _DropdownMuliAddingDialogState<T>
     return AnimatedContainer(
       padding: MediaQuery.of(context).viewInsets,
       duration: const Duration(milliseconds: 300),
-      child: new Card(
+      child: Card(
         color: widget.menuBackgroundColor,
         margin: EdgeInsets.symmetric(
             vertical: widget.dialogBox ? 10 : 5,
             horizontal: widget.dialogBox ? 10 : 4),
-        child: new Container(
+        child: Container(
           constraints: widget.menuConstraints,
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-          child: new Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               titleBar(),
               searchBar(),
-              list(),
+              searchResults(),
               closeButtonWrapper(),
             ],
           ),
@@ -170,13 +150,16 @@ class _DropdownMuliAddingDialogState<T>
     if (widget.validator == null) {
       return (true);
     }
-    return (widget.validator(selectedResult) == null);
+    return (widget
+            .validator(widget.searchableDropdownController.selectedIndexes) ==
+        null);
   }
 
   Widget titleBar() {
     var validatorOutput;
     if (widget.validator != null) {
-      validatorOutput = widget.validator(selectedResult);
+      validatorOutput =
+          widget.validator(widget.searchableDropdownController.selectedIndexes);
     }
 
     Widget validatorOutputWidget = valid
@@ -190,32 +173,31 @@ class _DropdownMuliAddingDialogState<T>
 
     Widget doneButtonWidget = widget.doneButton != null
         ? prepareWidget(widget.doneButton,
-            parameter: selectedResult,
+            parameter: widget.searchableDropdownController.selectedIndexes,
             context: context, stringToWidgetFunction: (String string) {
             return (FlatButton.icon(
                 onPressed: !valid
                     ? null
                     : () {
                         pop();
-                        setState(() {});
                       },
                 icon: Icon(Icons.close),
                 label: Text(string)));
           })
         : SizedBox.shrink();
     return widget.hint != null
-        ? new Container(
-            margin: EdgeInsets.only(bottom: 8),
+        ? Container(
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  prepareWidget(widget.hint),
-                  Column(
-                    children: <Widget>[doneButtonWidget, validatorOutputWidget],
-                  ),
-                ]),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                prepareWidget(widget.hint),
+                Column(
+                  children: <Widget>[doneButtonWidget, validatorOutputWidget],
+                ),
+              ],
+            ),
           )
-        : new Container(
+        : Container(
             child: Column(
               children: <Widget>[doneButtonWidget, validatorOutputWidget],
             ),
@@ -223,10 +205,10 @@ class _DropdownMuliAddingDialogState<T>
   }
 
   Widget searchBar() {
-    return new Container(
-      child: new Stack(
+    return Container(
+      child: Stack(
         children: <Widget>[
-          new TextField(
+          TextField(
             controller: txtSearch,
             decoration: InputDecoration(
                 contentPadding:
@@ -234,40 +216,37 @@ class _DropdownMuliAddingDialogState<T>
             autofocus: true,
             onChanged: (value) {
               _updateShownIndexes(value);
-              setState(() {});
             },
             keyboardType: widget.keyboardType,
           ),
-          new Positioned(
+          Positioned(
             left: 0,
             top: 0,
             bottom: 0,
-            child: new Center(
-              child: new Icon(
+            child: Center(
+              child: Icon(
                 Icons.search,
                 size: 24,
               ),
             ),
           ),
           txtSearch.text.isNotEmpty
-              ? new Positioned(
+              ? Positioned(
                   right: 0,
                   top: 0,
                   bottom: 0,
-                  child: new Center(
-                    child: new InkWell(
+                  child: Center(
+                    child: InkWell(
                       onTap: () {
-                        _updateShownIndexes('');
-                        setState(() {
-                          txtSearch.text = '';
-                        });
+                        txtSearch.clear();
+                        _updateShownIndexes(txtSearch.text);
                       },
                       borderRadius: BorderRadius.all(Radius.circular(32)),
-                      child: new Container(
+                      child: Container(
                         width: 32,
                         height: 32,
-                        child: new Center(
-                          child: new Icon(
+                        child: Center(
+                          child: Icon(
                             Icons.close,
                             size: 24,
                           ),
@@ -276,7 +255,7 @@ class _DropdownMuliAddingDialogState<T>
                     ),
                   ),
                 )
-              : new Container(),
+              : Container(),
         ],
       ),
     );
@@ -287,32 +266,47 @@ class _DropdownMuliAddingDialogState<T>
       Navigator.pop(context);
     } else {
       widget.displayMenu.value = false;
-      if (widget.callOnPop != null) {
-        widget.callOnPop();
-      }
     }
   }
 
-  Widget list() {
-    return new Expanded(
+  Widget searchResults() {
+    if (shownIndexes.isEmpty && txtSearch.text.isNotEmpty) {
+      return Card(
+        child: ListTile(
+          leading: Icon(Icons.add),
+          title: Text("Add tag"),
+          onTap: () {
+            widget.items.add(widget.dropdownItemBuilder(txtSearch.text));
+            widget.searchableDropdownController.addItemLabel(txtSearch.text);
+            widget.searchableDropdownController
+                .selectItem(widget.items.length - 1);
+            txtSearch.clear();
+            _updateShownIndexes(txtSearch.text);
+          },
+        ),
+      );
+    }
+    return Expanded(
       child: Scrollbar(
-        child: new ListView.builder(
+        child: ListView.builder(
           itemBuilder: (context, index) {
-            DropdownMenuItem item = widget.items[shownIndexes[index]];
-            return new InkWell(
+            DropdownMenuItem<String> item = widget.items[shownIndexes[index]];
+            return InkWell(
               onTap: () {
-                setState(() {
-                  if (widget.selectedItems.contains(shownIndexes[index])) {
-                    widget.selectedItems.remove(shownIndexes[index]);
-                  } else {
-                    widget.selectedItems.add(shownIndexes[index]);
-                  }
-                });
+                if (widget.searchableDropdownController
+                    .isItemSelected(shownIndexes[index])) {
+                  widget.searchableDropdownController
+                      .unselectItem(shownIndexes[index]);
+                } else {
+                  widget.searchableDropdownController
+                      .selectItem(shownIndexes[index]);
+                }
               },
               child: widget.displayItem == null
                   ? (Row(children: [
                       Icon(
-                        widget.selectedItems.contains(shownIndexes[index])
+                        widget.searchableDropdownController
+                                .isItemSelected(shownIndexes[index])
                             ? Icons.check_box
                             : Icons.check_box_outline_blank,
                       ),
@@ -322,7 +316,9 @@ class _DropdownMuliAddingDialogState<T>
                       Flexible(child: item),
                     ]))
                   : widget.displayItem(
-                      item, widget.selectedItems.contains(shownIndexes[index])),
+                      item,
+                      widget.searchableDropdownController
+                          .isItemSelected(shownIndexes[index])),
             );
           },
           itemCount: shownIndexes.length,
@@ -332,7 +328,8 @@ class _DropdownMuliAddingDialogState<T>
   }
 
   Widget closeButtonWrapper() {
-    return (prepareWidget(widget.closeButton, parameter: selectedResult,
+    return (prepareWidget(widget.closeButton,
+            parameter: widget.searchableDropdownController.selectedIndexes,
             stringToWidgetFunction: (String string) {
           return (Container(
             child: Row(
