@@ -106,10 +106,10 @@ class _SearchableMultiAddingDropdownState
   TextStyle get _textStyle =>
       widget.style ??
       (_enabled
-          ? Theme.of(context).textTheme.subhead
+          ? Theme.of(context).textTheme.subtitle1
           : Theme.of(context)
               .textTheme
-              .subhead
+              .subtitle1
               .copyWith(color: _disabledIconColor));
   bool get _enabled => dropdownMenuItems.isNotEmpty;
 
@@ -159,6 +159,15 @@ class _SearchableMultiAddingDropdownState
   }
 
   void update() {
+    if (dropdownMenuItems.isEmpty &&
+        widget.searchableDropdownController.itemLabels.isNotEmpty) {
+      for (String label in widget.searchableDropdownController.itemLabels) {
+        dropdownMenuItems.add(DropdownMenuItem(
+          child: Text(label),
+          value: label,
+        ));
+      }
+    }
     setState(() {});
   }
 
