@@ -100,6 +100,7 @@ class SearchableMultiAddingDropdown extends StatefulWidget {
 
 class _SearchableMultiAddingDropdownState
     extends State<SearchableMultiAddingDropdown> {
+  final FocusNode _defaultFocus = FocusNode();
   List<DropdownMenuItem<String>> dropdownMenuItems = [];
   PointerThisPlease<bool> displayMenu = PointerThisPlease<bool>(false);
 
@@ -246,6 +247,13 @@ class _SearchableMultiAddingDropdownState
             ? null
             : () async {
                 if (widget.dialogBox) {
+                  FocusScopeNode currentFocus = FocusScope.of(context);
+
+                  if (!currentFocus.hasPrimaryFocus) {
+                    currentFocus.unfocus();
+                    currentFocus.requestFocus(_defaultFocus);
+                  }
+
                   await showDialog(
                       context: context,
                       barrierDismissible: true,
