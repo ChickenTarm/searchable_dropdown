@@ -4,17 +4,8 @@ include: package:effective_dart/analysis_options.yaml
 
 analyzer:
   strong-mode:
-    # Maybe these will be changed in the future.
-    implicit-casts: false
+    implicit-casts: true
     implicit-dynamic: true
-  # errors:
-    # Trigger build failures for these rules.
-    # unused_field: error
-    # unused_local_variable: error
-
-  # TODO Possibly enable these in the future.
-  # enable-experiment:
-  #   - non-nullable # https://stackoverflow.com/questions/60068435/what-is-nullability-in-dart-non-nullable-by-default
   
 linter:
   rules:

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:searchable_dropdown/SearchableDropdownController.dart';
-import 'package:searchable_dropdown/searchable_multiple_dropdown.dart';
+import 'package:searchable_dropdown/src/searchable_multiple_dropdown.dart';
+import 'package:searchable_dropdown/src/searchable_multiple_dropdown/SearchableDropdownController.dart';
 
 class NotGiven {
   const NotGiven();
@@ -43,7 +43,7 @@ Widget prepareWidget(dynamic object,
   return (Text("Unknown type: ${object.runtimeType.toString()}"));
 }
 
-class DropdownMuliAddingDialog extends StatefulWidget {
+class DropdownMultiAddingDialog extends StatefulWidget {
   final List<DropdownMenuItem<String>> items;
   final DropdownMenuItem<String> Function(String itemLabel) dropdownItemBuilder;
   final SearchableDropdownController searchableDropdownController;
@@ -60,7 +60,7 @@ class DropdownMuliAddingDialog extends StatefulWidget {
   final BoxConstraints menuConstraints;
   final Color menuBackgroundColor;
 
-  DropdownMuliAddingDialog({
+  DropdownMultiAddingDialog({
     Key key,
     this.items,
     this.dropdownItemBuilder,
@@ -81,17 +81,17 @@ class DropdownMuliAddingDialog extends StatefulWidget {
         super(key: key);
 
   @override
-  _DropdownMuliAddingDialogState createState() =>
-      _DropdownMuliAddingDialogState();
+  _DropdownMultiAddingDialogState createState() =>
+      _DropdownMultiAddingDialogState();
 }
 
-class _DropdownMuliAddingDialogState extends State<DropdownMuliAddingDialog> {
+class _DropdownMultiAddingDialogState extends State<DropdownMultiAddingDialog> {
   TextEditingController txtSearch = TextEditingController();
   TextStyle defaultButtonStyle =
       TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
   List<int> shownIndexes = [];
 
-  _DropdownMuliAddingDialogState();
+  _DropdownMultiAddingDialogState();
 
   void _updateShownIndexes(String keyword) {
     setState(() {
@@ -100,8 +100,7 @@ class _DropdownMuliAddingDialogState extends State<DropdownMuliAddingDialog> {
   }
 
   void update() {
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override

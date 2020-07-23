@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:searchable_dropdown/searchable_dropdown.dart';
+import 'package:searchable_dropdown/src/searchable_dropdown.dart';
+import 'package:searchable_dropdown/src/searchable_dropdown/dropdown_dialog.dart';
 
 class ExampleNumber {
   int number;
@@ -31,6 +32,7 @@ class ExampleNumber {
 
   ExampleNumber(this.number);
 
+  @override
   String toString() {
     return ("$number $numberString");
   }
@@ -50,11 +52,9 @@ void main() {
       String searchKeyword = "4";
       List<DropdownMenuItem> items = [];
       for (int i = 0; i < 20; i++) {
-        items.add(new DropdownMenuItem(
-          child: new Text(
-            'test ' + i.toString(),
-          ),
-          value: 'test ' + i.toString(),
+        items.add(DropdownMenuItem(
+          child: Text('test ${i.toString()}'),
+          value: 'test ${i.toString()}',
         ));
       }
       await tester.pumpWidget(MaterialApp(
@@ -66,10 +66,10 @@ void main() {
             child: SearchableDropdown.single(
               items: items,
               value: selectedValue,
-              hint: new Text('Select One'),
-              searchHint: new Text(
+              hint: Text('Select One'),
+              searchHint: Text(
                 'Search and select one',
-                style: new TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20),
               ),
               onChanged: (value) {
 //              setState(() {
@@ -146,11 +146,9 @@ void main() {
       String searchKeyword = "4";
       List<DropdownMenuItem> items = [];
       for (int i = 0; i < 20; i++) {
-        items.add(new DropdownMenuItem(
-          child: new Text(
-            'test ' + i.toString(),
-          ),
-          value: 'test ' + i.toString(),
+        items.add(DropdownMenuItem(
+          child: Text('test ${i.toString()}'),
+          value: 'test ${i.toString()}',
         ));
       }
       await tester.pumpWidget(MaterialApp(
@@ -163,10 +161,10 @@ void main() {
               items: items,
               value: selectedValue,
               dialogBox: false,
-              hint: new Text('Select One'),
-              searchHint: new Text(
+              hint: Text('Select One'),
+              searchHint: Text(
                 'Search and select one',
-                style: new TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20),
               ),
               onChanged: (value) {
 //              setState(() {
@@ -427,11 +425,9 @@ void main() {
       String searchKeyword = "4";
       List<DropdownMenuItem> items = [];
       for (int i = 0; i < 20; i++) {
-        items.add(new DropdownMenuItem(
-          child: new Text(
-            'test ' + i.toString(),
-          ),
-          value: 'test ' + i.toString(),
+        items.add(DropdownMenuItem(
+          child: Text('test ${i.toString()}'),
+          value: 'test ${i.toString()}',
         ));
       }
       await tester.pumpWidget(MaterialApp(
@@ -443,10 +439,10 @@ void main() {
             child: SearchableDropdown.multiple(
               items: items,
               selectedItems: selectedItems,
-              hint: new Text('Select any'),
-              searchHint: new Text(
+              hint: Text('Select any'),
+              searchHint: Text(
                 'Search and select any',
-                style: new TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20),
               ),
               onChanged: (value) {
                 //              setState(() {

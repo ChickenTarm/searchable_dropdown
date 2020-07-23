@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:searchable_dropdown/DropdwnMultiAddingDialog.dart';
-import 'package:searchable_dropdown/SearchableDropdownController.dart';
+import 'package:searchable_dropdown/src/searchable_multiple_dropdown/DropdownMultiAddingDialog.dart';
+import 'package:searchable_dropdown/src/searchable_multiple_dropdown/SearchableDropdownController.dart';
 
 const EdgeInsetsGeometry _kAlignedButtonPadding =
     EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
@@ -206,7 +206,7 @@ class _SearchableMultiAddingDropdownState
   }
 
   Widget get menuWidget {
-    return DropdownMuliAddingDialog(
+    return DropdownMultiAddingDialog(
       items: dropdownMenuItems,
       dropdownItemBuilder: widget.dropdownItemBuilder,
       searchableDropdownController: widget.searchableDropdownController,
@@ -307,7 +307,6 @@ class _SearchableMultiAddingDropdownState
       ),
     );
 
-    final double bottom = 8.0;
     String validatorOutput;
     if (widget.validator != null) {
       validatorOutput =
@@ -329,17 +328,17 @@ class _SearchableMultiAddingDropdownState
                 : Positioned(
                     left: 0.0,
                     right: 0.0,
-                    bottom: bottom,
+                    bottom: 8.0,
                     child: widget.underline ??
                         Container(
                           height: 1.0,
                           decoration: BoxDecoration(
-                              border: Border(
-                                  bottom: BorderSide(
-                                      color: valid
-                                          ? Color(0xFFBDBDBD)
-                                          : Colors.red,
-                                      width: 0.0))),
+                            border: Border(
+                              bottom: BorderSide(
+                                  color: valid ? Color(0xFFBDBDBD) : Colors.red,
+                                  width: 0.0),
+                            ),
+                          ),
                         ),
                   ),
           ],
@@ -349,7 +348,10 @@ class _SearchableMultiAddingDropdownState
             : validatorOutput is String
                 ? Text(
                     validatorOutput,
-                    style: TextStyle(color: Colors.red, fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 13.0,
+                    ),
                   )
                 : null,
         displayMenu.value ? menuWidget : SizedBox.shrink(),
